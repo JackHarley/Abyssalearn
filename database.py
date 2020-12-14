@@ -42,7 +42,11 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS abyssal_observations (
             item_id INTEGER PRIMARY KEY,
             type_id INTEGER,
-            contract_id INTEGER
+            contract_id INTEGER,
+            dogma_attributes TEXT,
+            dogma_effects TEXT,
+            source_type_id INTEGER,
+            mutator_type_id INTEGER
         );
     ''')
 

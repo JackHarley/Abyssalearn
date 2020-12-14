@@ -1,7 +1,8 @@
-import requests
-import sqlite3
 import database
 import datetime
+import json
+import requests
+import sqlite3
 
 the_forge_region_id = 10000002
 abyssal_type_ids = [
@@ -25,8 +26,6 @@ def scrape_dogma_attributes():
         if attribute_id not in already_scraped:
             print("Scraping attribute id #%d (%d/%d)" % (attribute_id, count, len(attribute_ids)))
             scrape_dogma_attribute(attribute_id)
-        else:
-            print("Skipping attribute id #%d (%d/%d)" % (attribute_id, count, len(attribute_ids)))
         count += 1
 
 def scrape_dogma_attribute(attribute_id):
@@ -35,7 +34,7 @@ def scrape_dogma_attribute(attribute_id):
 
     db_conn = database.get_db_conn()
     c = db_conn.cursor()
-    c.execute("INSERT INTO dogma_attributes VALUES (?,?,?,?,?,?,?,?,?,?)", (
+    c.execute("INSERT INTO dogma_attributes VALUES (?,?,?,?,?,?)", (
         d["attribute_id"],
         d["name"]          if "name" in d else "",
         d["display_name"]  if "display_name" in d else "",
@@ -132,7 +131,7 @@ def scrape_public_contracts(region_id):
                 mark_contract_scraped(contract)
                 continue
 
-            print("Abyssal item found, item id #%d" % item["type_id"])
+            print("Abyssal item found, item id #%d" % item["item_id"])
             cur.execute("INSERT INTO abyssal_observations (item_id, type_id, contract_id) VALUES (?,?,?)", (
                 item["item_id"],
                 item["type_id"],
@@ -151,6 +150,39 @@ def mark_contract_scraped(data):
         parse_eve_date(data["date_expired"]),
         data["price"]
     ))
+    db_conn.commit()
+
+def scrape_incomplete_abyssal_items():
+    db_conn = database.get_db_conn()
+    cur = db_conn.cursor()
+    cur.execute("SELECT type_id, item_id FROM abyssal_observations WHERE source_type_id ISNULL")
+
+    while True:
+        row = cur.fetchone()
+        if row == None:
+            break
+        print("Scraping dynamic data for abyssal item #%d" % row[1])
+        scrape_abyssal_item(row[0], row[1])
+
+
+def scrape_abyssal_item(type_id, item_id):
+    r = requests.get("https://esi.evetech.net/v1/dogma/dynamic/items/%d/%d" % (type_id, item_id))
+    item = r.json()
+
+    db_conn = database.get_db_conn()
+    cur = db_conn.cursor()
+
+    cur.execute('''
+        UPDATE abyssal_observations 
+        SET (dogma_attributes, dogma_effects, source_type_id, mutator_type_id) = (?,?,?,?)
+        WHERE item_id = ?
+        ''', (
+            json.dumps(item["dogma_attributes"], separators=(',', ':')),
+            json.dumps(item["dogma_effects"], separators=(',', ':')),
+            item["source_type_id"],
+            item["mutator_type_id"],
+            item_id
+        ))
     db_conn.commit()
 
 def parse_eve_date(date):
