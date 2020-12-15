@@ -2,8 +2,9 @@
 
 Database
 --------------------------------
-It is highly advised you acquire a copy of `database.db` and place it in `/data` before running any commands.
+A copy of `database.db` is maintained in `data/database.db`, please avoid committing any of your changes to this file. 
 
+You can discard your local changes with `git reset --hard HEAD` before pulling. N.B. Make sure you have committed your own changes before running this command as it will wipe out any uncommitted changes from the filesystem!
 
 Installation
 --------------------------------
