@@ -18,3 +18,6 @@ Run `pipenv shell` and then use any of the following features:
 * `python main.py scrape` - Scrapes any new contract data from the EVE servers
 * `python main.py summary` - Print a summary of the data in the database
 * `python main.py random 47702` - Pull a random module with type ID 47702 (abyssal stasis webifier) and print its pricing/attributes
+* `python main.py ridgereg|lassoreg-crossval 47702 0.001` - Run Ridge|Lasso Regression with type ID 47702 and alpha=0.001 and print out the mean squared error of 5-Fold cross-validation
+* `python main.py linreg 47702` - Run Linear Regression with type ID 47702 and print out the mean squared error of 5-Fold cross-validation
+* `python main.py ridgereg-crossval|lassoreg-crossval 47702` - Run Ridge|Lasso Regression with type ID 47702 and test alpha in [0.0001, 0.001, 0.01, 0.1, 1] using 5-Fold cross-validation

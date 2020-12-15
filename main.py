@@ -1,3 +1,5 @@
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+
 import access
 import database
 import regression
@@ -29,4 +31,12 @@ if len(sys.argv) > 1:
         print("Dumping data for random module matching provided type id...\n")
         print(access.random_item(int(sys.argv[2])))
     elif sys.argv[1] == "linreg":
-        regression.do_linear_regression(int(sys.argv[2]))
+        regression.do_linear_regression(int(sys.argv[2]), LinearRegression)
+    elif sys.argv[1] == "ridgereg-crossval":
+        regression.do_regression_cross_val(sys.argv[2], Ridge)
+    elif sys.argv[1] == "ridgereg":
+        regression.do_linear_regression(sys.argv[2], Ridge, alpha=float(sys.argv[3]))
+    elif sys.argv[1] == "lassoreg-crossval":
+        regression.do_regression_cross_val(sys.argv[2], Lasso)
+    elif sys.argv[1] == "lassoreg":
+        regression.do_linear_regression(sys.argv[2], Lasso, alpha=float(sys.argv[3]))
