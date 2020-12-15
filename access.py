@@ -71,3 +71,35 @@ def random_item(type_id):
             summary += (attrib_ids_to_display_names[attrib["attribute_id"]].ljust(30)) + ("(#" + str(attrib["attribute_id"]) + "):").ljust(10) + "%f\n" % (attrib["value"])
 
     return summary
+
+def item_matrix(type_id):
+    db_conn = database.get_db_conn()
+    cur = db_conn.cursor()
+    cur.row_factory = sqlite3.Row
+    cur.execute('''
+        SELECT c.price, ao.dogma_attributes FROM abyssal_observations ao
+        LEFT JOIN contracts c ON c.contract_id=ao.contract_id
+        WHERE ao.type_id=?''', (type_id,))
+
+    matrix = []
+
+    while True:
+        item = cur.fetchone()
+
+        if item == None:
+            break
+
+        attribs = json.loads(item["dogma_attributes"])
+
+        attribs_dict = {}
+        for attrib in attribs:
+            if attrib["attribute_id"] not in blacklisted_attribute_ids:
+                attribs_dict[attrib["attribute_id"]] = attrib["value"]
+
+        attribs_values = list(attribs_dict.values())
+
+        vector = [item["price"]] + attribs_values
+        matrix.append(vector)
+
+    return matrix
+        
