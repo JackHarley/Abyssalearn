@@ -89,6 +89,10 @@ def do_polynomial_reg(type_id, model_class):
         mean_error.append(np.array(temp).mean())
         std_error.append(np.array(temp).std())
     
+    
+    for i in range(len(mean_error)):
+        print('The mean error for q=', i+1, 'is', mean_error[i], '\n')
+    
     plt.errorbar(q_values,mean_error,yerr=std_error,linewidth=3)
     plt.xlabel('q')
     plt.ylabel('Mean square error')
