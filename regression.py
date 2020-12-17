@@ -78,7 +78,7 @@ def do_polynomial_reg(type_id, model_class, **kwargs):
     for key, value in kwargs.items(): 
        print ("") 
 
-    Xpoly = PolynomialFeatures(int(value)).fit_transform(x)
+    Xpoly = PolynomialFeatures(degree=int(value)).fit_transform(x)
     model = model_class(normalize=True)
     temp=[]
     
@@ -104,7 +104,7 @@ def do_polynomial_reg(type_id, model_class, **kwargs):
 
 
 
-    def polynomial_crossval(type_id, model_class):
+def polynomial_crossval(type_id, model_class):
     matrix = access.item_matrix(type_id) # item id of abyssal magstab
     data = np.array(matrix)
     x = data[:, 1:]
@@ -128,11 +128,11 @@ def do_polynomial_reg(type_id, model_class, **kwargs):
         
         mean_error.append(np.array(temp).mean())
         std_error.append(np.array(temp).std())
-    
-    
+
+
     for i in range(len(mean_error)):
         print('The mean error for q=', i+1, 'is', mean_error[i], '\n')
-    
+
     plt.errorbar(q_values,mean_error,yerr=std_error,linewidth=3)
     plt.xlabel('q')
     plt.ylabel('Mean square error')
