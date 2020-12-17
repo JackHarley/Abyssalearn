@@ -32,6 +32,8 @@ if len(sys.argv) > 1:
         print(access.random_item(int(sys.argv[2])))
     elif sys.argv[1] == "linreg":
         regression.do_linear_regression(int(sys.argv[2]), LinearRegression)
+    elif sys.argv[1] == "poly_reg":
+        regression.do_polynomial_reg(int(sys.argv[2]), LinearRegression)
     elif sys.argv[1] == "ridgereg-crossval":
         regression.do_regression_cross_val(sys.argv[2], Ridge)
     elif sys.argv[1] == "ridgereg":

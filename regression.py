@@ -4,6 +4,7 @@ from sklearn.model_selection import KFold
 from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
 
 
 def do_linear_regression(type_id, model_class, **kwargs):
@@ -63,4 +64,32 @@ def do_regression_cross_val(type_id, model_class):
     plt.show()
 
 
+def do_polynomial_reg(type_id, model_class):
+    matrix = access.item_matrix(type_id) # item id of abyssal magstab
+    data = np.array(matrix)
+    x = data[:, 1:]
+    y = data[:, 0]
 
+    kf = KFold(n_splits=5)
+    q_values = [1,2,3,4,5,6]
+    mean_error=[]
+    std_error=[]
+
+    for q in q_values:
+        Xpoly = PolynomialFeatures(q).fit_transform(x)
+        model = model_class(normalize=True)
+        temp=[]
+        plotted = False
+        
+        for train, test in kf.split(Xpoly):
+            model.fit(Xpoly[train], y[train])
+            ypred = model.predict(Xpoly[test])
+            temp.append(mean_squared_error(y[test],ypred))
+        
+        mean_error.append(np.array(temp).mean())
+        std_error.append(np.array(temp).std())
+    
+    plt.errorbar(q_values,mean_error,yerr=std_error,linewidth=3)
+    plt.xlabel('q')
+    plt.ylabel('Mean square error')
+    plt.show()
