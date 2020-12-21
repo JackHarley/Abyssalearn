@@ -37,10 +37,10 @@ if len(sys.argv) > 1:
     elif sys.argv[1] == "polyreg-crossval":
         regression.polynomial_crossval(int(sys.argv[2]), LinearRegression)
     elif sys.argv[1] == "ridgereg-crossval":
-        regression.do_regression_cross_val(sys.argv[2], Ridge)
+        regression.do_regression_cross_val(sys.argv[2], Ridge, degree=float(sys.argv[3]))
     elif sys.argv[1] == "ridgereg":
-        regression.do_linear_regression(sys.argv[2], Ridge, alpha=float(sys.argv[3]))
+        regression.do_polynomial_reg(sys.argv[2], Ridge, degree=float(sys.argv[3]), alpha=float(sys.argv[4]))
     elif sys.argv[1] == "lassoreg-crossval":
-        regression.do_regression_cross_val(sys.argv[2], Lasso)
+        regression.do_regression_cross_val(sys.argv[2], Lasso, degree=float(sys.argv[3]))
     elif sys.argv[1] == "lassoreg":
-        regression.do_linear_regression(sys.argv[2], Lasso, alpha=float(sys.argv[3]))
+        regression.do_polynomial_reg(sys.argv[2], Lasso, degree=float(sys.argv[3]), alpha=float(sys.argv[4]))

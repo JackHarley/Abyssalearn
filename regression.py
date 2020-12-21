@@ -32,13 +32,14 @@ def do_linear_regression(type_id, model_class, **kwargs):
 
     print(f'{model_class.__name__} Mean Squared Error: {mse}')
     print(f'Dummy Classifier (Mean) Mean Squared Error: {dummy_mse}')
-    print(f'Percentage Difference: {(abs(mse - dummy_mse)/mse) * 100}%')
+    print(f'Percentage Difference: {((mse - dummy_mse)/mse) * 100}%')
 
 
-def do_regression_cross_val(type_id, model_class):
+def do_regression_cross_val(type_id, model_class, degree):
     matrix = access.item_matrix(type_id)  # item id of abyssal magstab
     data = np.array(matrix)
     x = data[:, 1:]
+    x = PolynomialFeatures(degree=int(degree)).fit_transform(x)
     y = data[:, 0]
 
     # cross_val
@@ -56,6 +57,7 @@ def do_regression_cross_val(type_id, model_class):
         mses = np.array(mses)
         alpha_mses.append(mses.mean())
         alpha_std_devs.append(mses.std())
+        print(f'alpha: {alpha}, mse: {mses.mean()}, std: {mses.std()}')
 
     plt.errorbar(alphas, alpha_mses, alpha_std_devs)
     plt.title(f'{model_class.__name__} 5-Fold Cross-Validation for Alpha')
@@ -64,22 +66,21 @@ def do_regression_cross_val(type_id, model_class):
     plt.show()
 
 
-def do_polynomial_reg(type_id, model_class, **kwargs):
+def do_polynomial_reg(type_id, model_class, degree, alpha=None):
     matrix = access.item_matrix(type_id) # item id of abyssal magstab
     data = np.array(matrix)
     x = data[:, 1:]
     y = data[:, 0]
 
     kf = KFold(n_splits=5)
-    q_values = [1,2,3,4,5,6]
-    mean_error=[]
+    mean_error = []
     dummy_mses = []
 
-    for key, value in kwargs.items(): 
-       print ("") 
-
-    Xpoly = PolynomialFeatures(degree=int(value)).fit_transform(x)
-    model = model_class(normalize=True)
+    Xpoly = PolynomialFeatures(degree=int(degree)).fit_transform(x)
+    if alpha is not None:
+        model = model_class(normalize=True, alpha=alpha)
+    else:
+        model = model_class(normalize=True)
     temp=[]
     
     for train, test in kf.split(Xpoly):
@@ -99,7 +100,7 @@ def do_polynomial_reg(type_id, model_class, **kwargs):
 
     print(f'{model_class.__name__} w/ Polynomial Features Mean Squared Error: {mse}')
     print(f'Dummy Classifier (Mean) Mean Squared Error: {dummy_mse}')
-    print(f'Percentage Difference: {(abs(mse - dummy_mse)/mse) * 100}%')
+    print(f'Percentage Difference: {((mse - dummy_mse)/mse) * 100}%')
     
 
 
@@ -135,5 +136,6 @@ def polynomial_crossval(type_id, model_class):
 
     plt.errorbar(q_values,mean_error,yerr=std_error,linewidth=3)
     plt.xlabel('q')
-    plt.ylabel('Mean square error')
+    plt.ylabel('Mean square error (w/ standard deviation)')
+    plt.title(f'{model_class.__name__} 5-Fold Cross-Validation for q')
     plt.show()
