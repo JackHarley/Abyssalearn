@@ -4,6 +4,7 @@ from sklearn.model_selection import KFold
 from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
 
 
 def do_linear_regression(type_id, model_class, **kwargs):
@@ -63,4 +64,76 @@ def do_regression_cross_val(type_id, model_class):
     plt.show()
 
 
+def do_polynomial_reg(type_id, model_class, **kwargs):
+    matrix = access.item_matrix(type_id) # item id of abyssal magstab
+    data = np.array(matrix)
+    x = data[:, 1:]
+    y = data[:, 0]
 
+    kf = KFold(n_splits=5)
+    q_values = [1,2,3,4,5,6]
+    mean_error=[]
+    dummy_mses = []
+
+    for key, value in kwargs.items(): 
+       print ("") 
+
+    Xpoly = PolynomialFeatures(degree=int(value)).fit_transform(x)
+    model = model_class(normalize=True)
+    temp=[]
+    
+    for train, test in kf.split(Xpoly):
+        model.fit(Xpoly[train], y[train])
+        ypred = model.predict(Xpoly[test])
+        temp.append(mean_squared_error(y[test],ypred))
+
+        dummy_model = DummyRegressor(strategy='mean')
+        dummy_model.fit(Xpoly[train], y[train])
+        dummy_pred = dummy_model.predict(Xpoly[test])
+    
+        mean_error.append(mean_squared_error(y[test], ypred))
+        dummy_mses.append(mean_squared_error(y[test], dummy_pred))
+
+    mse = np.array(mean_error).mean()
+    dummy_mse = np.array(dummy_mses).mean()
+
+    print(f'{model_class.__name__} w/ Polynomial Features Mean Squared Error: {mse}')
+    print(f'Dummy Classifier (Mean) Mean Squared Error: {dummy_mse}')
+    print(f'Percentage Difference: {(abs(mse - dummy_mse)/mse) * 100}%')
+    
+
+
+
+def polynomial_crossval(type_id, model_class):
+    matrix = access.item_matrix(type_id) # item id of abyssal magstab
+    data = np.array(matrix)
+    x = data[:, 1:]
+    y = data[:, 0]
+
+    kf = KFold(n_splits=5)
+    q_values = [1,2,3,4,5,6]
+    mean_error=[]
+    std_error=[]
+
+    for q in q_values:
+        Xpoly = PolynomialFeatures(q).fit_transform(x)
+        model = model_class(normalize=True)
+        temp=[]
+        plotted = False
+        
+        for train, test in kf.split(Xpoly):
+            model.fit(Xpoly[train], y[train])
+            ypred = model.predict(Xpoly[test])
+            temp.append(mean_squared_error(y[test],ypred))
+        
+        mean_error.append(np.array(temp).mean())
+        std_error.append(np.array(temp).std())
+
+
+    for i in range(len(mean_error)):
+        print('The mean error for q=', i+1, 'is', mean_error[i], '\n')
+
+    plt.errorbar(q_values,mean_error,yerr=std_error,linewidth=3)
+    plt.xlabel('q')
+    plt.ylabel('Mean square error')
+    plt.show()
