@@ -1,4 +1,7 @@
 data/*
+report/*.synctex.gz
+report/*.log
+report/*.aux
 __pycache__
 !data/database.db
 !.gitkeep
