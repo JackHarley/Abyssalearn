@@ -30,6 +30,9 @@ if len(sys.argv) > 1:
     elif sys.argv[1] == "random":
         print("Dumping data for random module matching provided type id...\n")
         print(access.random_item(int(sys.argv[2])))
+    elif sys.argv[1] == "matrix":
+        print("Dumping matrix for modules of given type id...\n")
+        print(access.item_matrix(int(sys.argv[2])))
     elif sys.argv[1] == "linreg":
         regression.do_linear_regression(int(sys.argv[2]), LinearRegression)
     elif sys.argv[1] == "polyreg":
